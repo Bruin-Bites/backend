@@ -16,11 +16,9 @@ mapsRouter.get("/restaurants", async (req: Request, res: Response) => {
       let url: string;
 
       if (nextPageToken) {
-        // Wait for token activation
         await new Promise((resolve) => setTimeout(resolve, 3000));
         url = `${API_BASE}?pagetoken=${nextPageToken}&key=${GOOGLE_API_KEY}`;
       } else {
-        // Initial query request
         url = `${API_BASE}?query=${encodeURIComponent(QUERY)}&key=${GOOGLE_API_KEY}`;
       }
 
@@ -28,7 +26,6 @@ mapsRouter.get("/restaurants", async (req: Request, res: Response) => {
 
       console.log(JSON.stringify(data, null, 2));
 
-      // Push the restaurant results, not the whole response
       if (data.results && data.results.length > 0) {
         westwoodRestaurants.push(...data.results);
       }
