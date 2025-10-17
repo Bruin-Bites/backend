@@ -1,3 +1,6 @@
+const mongoose = require("mongoose");
+
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -5,6 +8,8 @@ const morgan = require("morgan");
 require("dotenv").config();
 
 const apiRouter = require("./routes");
+
+mongoose.connect(process.env.MONGODB_URI);
 
 const app = express();
 

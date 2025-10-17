@@ -36,4 +36,6 @@ Swap-ins: frozen veggies, leftover chicken/tofu, or canned beans.`
   });
 });
 
+router.post("/recipes-ai", (req, res) => {
+})
 module.exports = router;
