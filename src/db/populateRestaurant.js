@@ -5,11 +5,47 @@ const {
 } = require("./mongoDB");
 const { fetchRestaurantsFromGoogle } = require("../services/googleMaps");
 
+// Normalizes the Google Maps restaurant payload into our schema shape.
+function normalizeRestaurant(restaurant) {
+  const location = restaurant.geometry?.location;
+  const latValue =
+    typeof location?.lat === "function" ? location.lat() : location?.lat;
+  const lngValue =
+    typeof location?.lng === "function" ? location.lng() : location?.lng;
+
+  const normalized = {
+    name: restaurant.name,
+    address:
+      restaurant.formatted_address || restaurant.vicinity || undefined,
+    rating:
+      typeof restaurant.rating === "number" ? restaurant.rating : undefined,
+    place_id: restaurant.place_id,
+    types: Array.isArray(restaurant.types) ? restaurant.types : undefined,
+  };
+
+  if (latValue !== undefined && lngValue !== undefined) {
+    normalized.geometry = {
+      location: {
+        lat: latValue,
+        lng: lngValue,
+      },
+    };
+  }
+
+  return normalized;
+}
+
 // This function will replace the "Restaurant Collection" with the latest data from Google Maps.
 async function populateRestaurantsCollection() {
   // Currently, only 60 restaurants are limited by Google Maps API
-  const restaurants = await fetchRestaurantsFromGoogle();
-  console.log(`Fetched ${restaurants.length} restaurants from Google Maps.`);
+  const rawRestaurants = await fetchRestaurantsFromGoogle();
+  const restaurants = rawRestaurants
+    .map(normalizeRestaurant)
+    .filter((restaurant) => restaurant.name && restaurant.address);
+
+  console.log(
+    `Fetched ${rawRestaurants.length} restaurants from Google Maps. ${restaurants.length} contain address data.`
+  );
   // Solutions to increase number of restaurants:
   // 1. Use different queries to cover more areas (e.g., "restaurants near UCLA", "restaurants in Los Angeles", etc.)
   // 2. Use Google Places Nearby Search API with multiple locations and radii to gather more data points.

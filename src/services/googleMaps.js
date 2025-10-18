@@ -4,8 +4,20 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const API_BASE = process.env.GOOGLE_MAPS_API_BASE;
-const DEFAULT_QUERY = process.env.GOOGLE_MAPS_DEFAULT_QUERY;
+// Cleans up environment variable strings by trimming whitespace and removing surrounding quotes or semicolons
+function sanitizeEnvString(value) {
+  if (!value) {
+    return "";
+  }
+  return value.trim().replace(/^['"]|['";]+$/g, "");
+}
+
+// Base URL for Google Maps Text Search API
+const API_BASE =
+  sanitizeEnvString(process.env.GOOGLE_MAPS_API_BASE) ||
+  process.env.GOOGLE_MAPS_API_BASE;
+
+const DEFAULT_QUERY = sanitizeEnvString(process.env.GOOGLE_MAPS_DEFAULT_QUERY);
 
 // Retrieves restaurants from the Google Maps API using the provided query.
 async function fetchRestaurantsFromGoogle(query = DEFAULT_QUERY) {
@@ -14,6 +26,12 @@ async function fetchRestaurantsFromGoogle(query = DEFAULT_QUERY) {
   // Validate that the API key is available ( currently using Shuan's google maps API key )
   if (!apiKey) {
     throw new Error("GOOGLE_API_KEY is not defined in the .env file.");
+  }
+
+  if (!API_BASE) {
+    throw new Error(
+      "GOOGLE_MAPS_API_BASE is not defined in the .env file or default fallback."
+    );
   }
 
   const collectedResults = [];

@@ -11,6 +11,12 @@ const restaurantSchema = new mongoose.Schema({
   rating: Number,
   place_id: String,
   types: [String],
+  geometry: {
+    location: {
+      lat: Number,
+      lng: Number,
+    },
+  },
 });
 
 const Restaurant =
